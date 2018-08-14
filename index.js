@@ -3,27 +3,21 @@ const { createLogger, transports } = require('winston');
 
 require('winston-mongodb');
 
-const getConnectedDb = () => new Promise(resolve =>
+const connectedDb = new Promise(resolve =>
   mongoose.connection.once('open', () => resolve(mongoose.connection.client))
 );
+const getConnectedDb = () => connectedDb;
 
-const logger1 = createLogger({
-  transports: [
-    new transports.MongoDB({
-      db: getConnectedDb(),
-      collection: 'logs',
-    }),
-  ],
-});
-
-const logger2 = createLogger({
-  transports: [
-    new transports.MongoDB({
-      db: getConnectedDb(),
-      collection: 'logs',
-    }),
-  ],
-});
+for (let i = 0; i < 10; i++) {
+  createLogger({
+    transports: [
+      new transports.MongoDB({
+        db: getConnectedDb(),
+        collection: 'logs',
+      }),
+    ],
+  });
+}
 
 process.on('unhandledRejection', (reason, e) => console.log(e));
 
